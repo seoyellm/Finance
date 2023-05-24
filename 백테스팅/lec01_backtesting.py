@@ -11,25 +11,27 @@ from backtesting.lib import crossover
 from backtesting.test import SMA, GOOG
 
 
-class SmaCross(Strategy):
+class SmaCross(Strategy): # 전략
     n1 = 10
     n2 = 20
 
-    def init(self):
-        close = self.data.Close
-        self.sma1 = self.I(SMA, close, self.n1)
+    def init(self): # 초기화   # self : 메모리 주소 할당
+        close = self.data.Close # 종가 데이터
+        self.sma1 = self.I(SMA, close, self.n1) # 이평 계산
         self.sma2 = self.I(SMA, close, self.n2)
 
-    def next(self):
-        if crossover(self.sma1, self.sma2):
-            self.buy()
-        elif crossover(self.sma2, self.sma1):
+    def next(self): # 스레드 run(), 한번 구동하고 종료 --> 나만의 전략 작성
+        if crossover(self.sma1, self.sma2): # sma1-sma2 > 0 일 때(단기가 장기를 넘어섰을 때 )
+            self.buy() # self에서 만든 메모리 안에 buy()를 만듬
+        elif crossover(self.sma2, self.sma1): # sma2-sma1 > 0 일 때(단기가 장기보다 내려갔을 때)
             self.sell()
 
 
-bt = Backtest(GOOG, SmaCross,
-              cash=10000, commission=.002,
-              exclusive_orders=True)
+bt = Backtest(GOOG, # 종목 : google
+              SmaCross, # 내가 만든 전략
+              cash=10000,  # 보유 현금
+              commission=.002, # 커미션
+              exclusive_orders=True) # 주문종목 보기
 
 output = bt.run()
 # bt.plot()
